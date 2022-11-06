@@ -13,7 +13,8 @@
   "author": "Oscar Jove",
   "license": "ISC",
   "dependencies": {
-    "express": "4.18.2"
+    "express": "4.18.2",
+    "mongodb": "^4.11.0"
   },
   "bugs": {
     "url": "https://github.com/turkin/arquitecturaweb/issues"

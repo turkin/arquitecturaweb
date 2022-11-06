@@ -1,5 +1,10 @@
+const { request, response } = require("express");
 const express = require("express");
 const app = express();
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/";
+
+app.use(express.json());
 
 app.use((req, res, next) => {
     console.log(req.method, req.path);
@@ -13,7 +18,18 @@ app.get('/api/clients', (req, res, next) => {
 });
 
 app.post('/api/clients', (req, res, next) => {
-    res.send('Ingreso cliente y respondo con los datos ingresados');
+    //Ingreso cliente y respondo con los datos ingresados
+    console.log(req.body);
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        dbo.collection("clients").insertOne(req.body, function (err, res) {
+            if (err) throw err;
+            console.log("Cliente agregado");
+            db.close();
+        });
+    });
+    res.status(201).send(req.body);
 });
 
 app.patch('/api/clients/', (req, res, next) => {
