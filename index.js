@@ -14,7 +14,35 @@ app.use((req, res, next) => {
 //CRUD usuarios
 
 app.get('/api/clients', (req, res, next) => {
-    res.send('Respondo clientes');
+    //Respondo clientes
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        dbo.collection("clients").find({}).toArray(function (err, result) {
+            if (err) throw err;
+            console.log(result);
+            db.close();
+            res.json(result);
+        });
+    });
+});
+
+app.get('/api/clients/:id', (req, res, next) => {
+    //Respondo clientes
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        //var query = { dni:30303303 };
+        var query = { dni:Number(req.params.id)};
+        console.log(query);
+        //dbo.collection("clients").find({ dni:req.params.id }).toArray(function (err, result) {
+        dbo.collection("clients").findOne(query, function (err, result) {
+            if (err) throw err;
+            console.log(result);
+            db.close();
+            res.json(result);
+        });
+    });
 });
 
 app.post('/api/clients', (req, res, next) => {
