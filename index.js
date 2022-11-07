@@ -136,7 +136,47 @@ app.delete('/api/clients/', (req, res, next) => {
 });
 
 app.delete('/api/clients/:id', (req, res, next) => {
-    res.send('Elimino cliente ' + req.params.id +' y respondo con los datos eliminados');
+    //Elimino cliente y respondo con los datos eliminados');
+    var borrado;
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        var query = { dni: Number(req.params.id) };
+        dbo.collection("clients").findOne(query, function (err, result) {
+            if (err) throw err;
+            //db.close();
+            if (result) {
+                var borrado = result;
+                dbo.collection("clients").deleteOne(query, function (err, obj) {
+                    if (err) throw err;
+                    console.log("Cliente eliminado");
+                    db.close();
+                    console.log(borrado);
+                    res.json(borrado);
+                });
+            } else {
+                db.close();
+                res.status(404).json('');
+                
+            }
+        });
+    });
+
+
+
+
+    //MongoClient.connect(url, function (err, db) {
+    //    if (err) throw err;
+    //    var dbo = db.db("library");
+    //    var query = { dni: Number(req.params.id) };
+        
+            
+            
+            
+        
+    //    
+    //});
+    
 });
 
 
