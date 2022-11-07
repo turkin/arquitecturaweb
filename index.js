@@ -161,22 +161,6 @@ app.delete('/api/clients/:id', (req, res, next) => {
             }
         });
     });
-
-
-
-
-    //MongoClient.connect(url, function (err, db) {
-    //    if (err) throw err;
-    //    var dbo = db.db("library");
-    //    var query = { dni: Number(req.params.id) };
-        
-            
-            
-            
-        
-    //    
-    //});
-    
 });
 
 
