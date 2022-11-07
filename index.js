@@ -69,63 +69,61 @@ app.patch('/api/clients/', (req, res, next) => {
 app.patch('/api/clients/:id', (req, res, next) => {
     //Actualizo cliente 
     var query = { dni: Number(req.params.id) };
-
-    if (typeof req.body.apellido !== 'undefined' && req.body.apellido) {
-        MongoClient.connect(url, function (err, db) {
-            if (err) throw err;
-            var dbo = db.db("library");
-            var newvalues = { $set: { apellido: req.body.apellido } };
-            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
-                if (err) throw err;
-                console.log("Apellido actualizado");
-
-            });
-        });
-
-    }
-    if (typeof req.body.nombre !== 'undefined' && req.body.nombre) {
-        MongoClient.connect(url, function (err, db) {
-            if (err) throw err;
-            var dbo = db.db("library");
-            var newvalues = { $set: { nombre: req.body.nombre } };
-            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
-                if (err) throw err;
-                console.log("Nombre actualizado");
-
-            });
-        });
-
-    }
-    if (typeof req.body.dni !== 'undefined' && req.body.dni) {
-        MongoClient.connect(url, function (err, db) {
-            if (err) throw err;
-            var dbo = db.db("library");
-            var newvalues = { $set: { dni: req.body.dni } };
-            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
-                if (err) throw err;
-                console.log("DNI actualizado");
-            });
-        });
-
-    };
-
-    //respondo con los datos actualizados
+    var changed = 0;
     MongoClient.connect(url, function (err, db) {
         if (err) throw err;
         var dbo = db.db("library");
-        if (typeof req.body.dni !== 'undefined' && req.body.dni) {
-            var query = { dni: Number(req.body.dni) };
+        if (typeof req.body.apellido !== 'undefined' && req.body.apellido) {
+                var newvalues = { $set: { apellido: req.body.apellido } };
+                dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                    if (err) throw err;
+                    if (res.modifiedCount) {
+                        console.log("Apellido actualizado");
+                        changed = changed + 1;
+                    }
+                });
         }
-        dbo.collection("clients").findOne(query, function (err, result) {
+        if (typeof req.body.nombre !== 'undefined' && req.body.nombre) {
+                var newvalues = { $set: { nombre: req.body.nombre } };
+                dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                    if (err) throw err;
+                    if (res.modifiedCount) {
+                        console.log("Nombre actualizado");
+                        changed = changed + 1;
+                    }
+                });
+        }
+        if (typeof req.body.dni !== 'undefined' && req.body.dni) {
+                var newvalues = { $set: { dni: req.body.dni } };
+                dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                    if (err) throw err;
+                    if (res.modifiedCount) {
+                        console.log("DNI actualizado");
+                        changed = changed + 1;
+                    }
+                });
+        };
+         //respondo con los datos actualizados
+        if (typeof req.body.dni !== 'undefined' && req.body.dni) {
+            var newQuery = { dni: Number(req.body.dni) };
+        } else {
+            var newQuery = { dni: Number(req.params.id) };
+        }
+        dbo.collection("clients").findOne(newQuery, function (err, result) {
             if (err) throw err;
             db.close();
-            if (result) {
+            if (result && changed) {
                 res.json(result);
+            } else if (result && !changed) {
+                res.status(400).json('');
             } else {
                 res.status(404).json('');
             }
         });
+
     });
+   
+
 });
     
 
