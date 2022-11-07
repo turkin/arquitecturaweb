@@ -30,17 +30,19 @@ app.get('/api/clients', (req, res, next) => {
 app.get('/api/clients/:id', (req, res, next) => {
     //Respondo clientes
     MongoClient.connect(url, function (err, db) {
-        if (err) throw err;
+        //if (err) throw err;
         var dbo = db.db("library");
-        //var query = { dni:30303303 };
         var query = { dni:Number(req.params.id)};
         console.log(query);
-        //dbo.collection("clients").find({ dni:req.params.id }).toArray(function (err, result) {
         dbo.collection("clients").findOne(query, function (err, result) {
             if (err) throw err;
             console.log(result);
             db.close();
-            res.json(result);
+            if (result) {
+                res.json(result);
+            } else {
+                res.status(404).json('');
+            }
         });
     });
 });
@@ -61,15 +63,76 @@ app.post('/api/clients', (req, res, next) => {
 });
 
 app.patch('/api/clients/', (req, res, next) => {
-    res.status(400).send('No detalla usuario a actualizar');
+    res.status(400).json('');
 });
 
 app.patch('/api/clients/:id', (req, res, next) => {
-    res.send('Actualizo cliente '+req.params.id+' y respondo con los datos actualizados');
+    //Actualizo cliente 
+    var query = { dni: Number(req.params.id) };
+
+    if (typeof req.body.apellido !== 'undefined' && req.body.apellido) {
+        MongoClient.connect(url, function (err, db) {
+            if (err) throw err;
+            var dbo = db.db("library");
+            var newvalues = { $set: { apellido: req.body.apellido } };
+            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                if (err) throw err;
+                console.log("Apellido actualizado");
+
+            });
+        });
+
+    }
+    if (typeof req.body.nombre !== 'undefined' && req.body.nombre) {
+        MongoClient.connect(url, function (err, db) {
+            if (err) throw err;
+            var dbo = db.db("library");
+            var newvalues = { $set: { nombre: req.body.nombre } };
+            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                if (err) throw err;
+                console.log("Nombre actualizado");
+
+            });
+        });
+
+    }
+    if (typeof req.body.dni !== 'undefined' && req.body.dni) {
+        MongoClient.connect(url, function (err, db) {
+            if (err) throw err;
+            var dbo = db.db("library");
+            var newvalues = { $set: { dni: req.body.dni } };
+            dbo.collection("clients").updateOne(query, newvalues, function (err, res) {
+                if (err) throw err;
+                console.log("DNI actualizado");
+            });
+        });
+
+    };
+
+    //respondo con los datos actualizados
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        if (typeof req.body.dni !== 'undefined' && req.body.dni) {
+            var query = { dni: Number(req.body.dni) };
+        }
+        dbo.collection("clients").findOne(query, function (err, result) {
+            if (err) throw err;
+            db.close();
+            if (result) {
+                res.json(result);
+            } else {
+                res.status(404).json('');
+            }
+        });
+    });
 });
+    
+
+
 
 app.delete('/api/clients/', (req, res, next) => {
-    res.status(400).send('No detalla usuario a eliminar');
+    res.status(400).json('');
 });
 
 app.delete('/api/clients/:id', (req, res, next) => {
