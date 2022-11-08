@@ -357,7 +357,6 @@ app.get('/api/rents/clients/:id', (req, res, next) => {
                         if (cont == rent.length) {
                             db.close();
                             res.json(rent);
-                            console.log(rent);
                         };
                     });
                 });
@@ -366,23 +365,36 @@ app.get('/api/rents/clients/:id', (req, res, next) => {
     });
 });
 
-//app.get('/api/rents/clients/:id', (req, res, next) => {
-//    //Respondo alquileres por cliente
-//    MongoClient.connect(url, async function (err, db) {
-//        if (err) throw err;
-//        var dbo = db.db("library");
-//        var query = { cliente: Number(req.params.id) };
-//        const rents = await dbo.collection("rents").find(query, { projection: { cliente: 0 } })
-//        console.log(rents);
-//        let rent = rents.map(async rent => {
-//            var queryID = { id: Number(element.libro) };
-//            const libro = await dbo.collection("books").findOne(queryId);
-//            element.libro = libro;
-//            return element;
-//        });
-//        res.json(rent)
-//    });
-//});
+app.get('/api/rents/books/:id', (req, res, next) => {
+    //Respondo alquileres por libro
+    var cont = 0;
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        var query = { libro: Number(req.params.id) };
+        dbo.collection("rents").find(query, { projection: { libro: 0 } }).toArray(function (err, result) {
+            if (err) throw err;
+            const rent = result;
+            if (rent.length == 0) {
+                res.status("404").json("");
+            } else {
+                rent.forEach(element => {
+                    var queryID = { dni: Number(element.cliente) };
+                    dbo.collection("clients").findOne(queryID, function (err, result) {
+                        if (err) throw err;
+                        element.cliente = result;
+                        cont = cont + 1;
+                        if (cont == rent.length) {
+                            db.close();
+                            res.json(rent);
+                        };
+                    });
+                });
+            };
+        });
+    });
+});
+
 
 app.listen(3000, () => {
     console.log("Trabajo practico iniciado...");
