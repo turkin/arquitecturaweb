@@ -327,42 +327,62 @@ app.post('/api/rents', (req, res, next) => {
                 db.close();
                 res.status(201).json(rent);
             });
-            
         });
-
-            
     });
-
-    
 });
 
+app.get('/api/rents/clients/', (req, res, next) => {
+    res.status(400).json('');
+});
 
+app.get('/api/rents/clients/:id', (req, res, next) => {
+    //Respondo alquileres por cliente
+    var cont = 0;
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        var query = { cliente: Number(req.params.id) };
+        dbo.collection("rents").find(query, { projection: { cliente: 0 } }).toArray(function (err, result) {
+            if (err) throw err;
+            const rent = result;
+            if (rent.length == 0) {
+                res.status("404").json("");
+            } else { 
+                rent.forEach(element => {
+                    var queryID = { id: Number(element.libro) };
+                    dbo.collection("books").findOne(queryID, function (err, result) {
+                        if (err) throw err;
+                        element.libro = result;
+                        cont = cont + 1;
+                        if (cont == rent.length) {
+                            db.close();
+                            res.json(rent);
+                            console.log(rent);
+                        };
+                    });
+                });
+            };
+        });
+    });
+});
 
-
-
-//MongoClient.connect(url, function (err, db) {
-//    
-//    var dbo = db.db("library");
-//    
-//    console.log(query);
-//    dbo.collection("books").findOne(query, function (err, result) {
+//app.get('/api/rents/clients/:id', (req, res, next) => {
+//    //Respondo alquileres por cliente
+//    MongoClient.connect(url, async function (err, db) {
 //        if (err) throw err;
-//        console.log(result);
-//        db.close();
-//        if (result) {
-//            res.json(result);
-//        } else {
-//            res.status(404).json('');
-//        }
+//        var dbo = db.db("library");
+//        var query = { cliente: Number(req.params.id) };
+//        const rents = await dbo.collection("rents").find(query, { projection: { cliente: 0 } })
+//        console.log(rents);
+//        let rent = rents.map(async rent => {
+//            var queryID = { id: Number(element.libro) };
+//            const libro = await dbo.collection("books").findOne(queryId);
+//            element.libro = libro;
+//            return element;
+//        });
+//        res.json(rent)
 //    });
 //});
-
-
-
-
-
-
-
 
 app.listen(3000, () => {
     console.log("Trabajo practico iniciado...");
