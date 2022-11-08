@@ -365,6 +365,10 @@ app.get('/api/rents/clients/:id', (req, res, next) => {
     });
 });
 
+app.get('/api/rents/books/', (req, res, next) => {
+    res.status(400).json('');
+});
+
 app.get('/api/rents/books/:id', (req, res, next) => {
     //Respondo alquileres por libro
     var cont = 0;
