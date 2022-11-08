@@ -59,7 +59,7 @@ app.post('/api/clients', (req, res, next) => {
             db.close();
         });
     });
-    res.status(201).send(req.body);
+    res.status(201).json(req.body);
 });
 
 app.patch('/api/clients/', (req, res, next) => {
@@ -204,7 +204,7 @@ app.post('/api/books', (req, res, next) => {
             db.close();
         });
     });
-    res.status(201).send(req.body);
+    res.status(201).json(req.body);
 });
 
 app.patch('/api/books/', (req, res, next) => {
@@ -299,6 +299,68 @@ app.delete('/api/books/:id', (req, res, next) => {
         });
     });
 });
+
+
+//CRUD renta
+
+app.post('/api/rents', (req, res, next) => {
+    //Ingreso cliente y libro y respondo con los datos ingresados
+    const rent = [];
+    console.log(req.body);
+    MongoClient.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("library");
+        dbo.collection("rents").insertOne(req.body, function (err, result) {
+            if (err) throw err;
+            console.log("Renta agregada");
+            var queryDNI = { dni: Number(req.body.cliente) };
+            dbo.collection("clients").findOne(queryDNI, function (err, result) {
+                if (err) throw err;
+                //console.log(result);
+                rent.push(result);
+            });
+            var queryID = { id: Number(req.body.libro) };
+            dbo.collection("books").findOne(queryID, function (err, result) {
+                if (err) throw err;
+                //console.log(result);
+                rent.push(result);
+                db.close();
+                res.status(201).json(rent);
+            });
+            
+        });
+
+            
+    });
+
+    
+});
+
+
+
+
+
+//MongoClient.connect(url, function (err, db) {
+//    
+//    var dbo = db.db("library");
+//    
+//    console.log(query);
+//    dbo.collection("books").findOne(query, function (err, result) {
+//        if (err) throw err;
+//        console.log(result);
+//        db.close();
+//        if (result) {
+//            res.json(result);
+//        } else {
+//            res.status(404).json('');
+//        }
+//    });
+//});
+
+
+
+
+
 
 
 
